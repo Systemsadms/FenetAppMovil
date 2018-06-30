@@ -1,0 +1,1326 @@
+<!DOCTYPE html> 
+<html>
+<head>
+	<title>Inicio</title>
+	<meta charset="UTF-8">
+	<meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+
+	
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+$(function(){
+
+
+
+
+//LOADING MENSAJE 1
+  $( document ).on( "click", ".show-page-loading-msg", function() {
+    var $this = $( this ),
+        theme = $this.jqmData( "theme" ) || $.mobile.loader.prototype.options.theme,
+        msgText = $this.jqmData( "msgtext" ) || $.mobile.loader.prototype.options.text,
+        textVisible = $this.jqmData( "textvisible" ) || $.mobile.loader.prototype.options.textVisible,
+        textonly = !!$this.jqmData( "textonly" );
+        html = $this.jqmData( "html" ) || "";
+    $.mobile.loading( "show", {
+            text: msgText,
+            textVisible: textVisible,
+            theme: theme,
+            textonly: textonly,
+            html: html
+    });
+})
+.on( "click", ".hide-page-loading-msg", function() {
+    $.mobile.loading( "hide" );
+    $.mobile.changePage("#pagina1");
+
+    $("#descripcion").val("");
+    $("#fecha").val("dd/mm/aaaa");
+    $("#ciudad").val("");
+    $("#direccion").val("");
+    $("#pass").val("");
+
+    $("#mnombre").val("");
+    $("#mapellido").val("");
+    $("#mcorreo").val("");
+    $("#mpass").val("");
+    $("#mtelefono").val("");
+});
+
+
+
+
+
+
+
+
+
+
+
+//PAGINA 2 (EL SERVICIO)
+
+
+
+    var test = "hola";
+    var servicios = [];
+    $.ajax({type : "POST",
+      url  : "http://fenet.com.ve/phonegap/listaServicios.php",
+      //url  : "listaServicios.php",
+      data : ({direccion:test}),
+      cache:false,
+      dataType :"text",
+      success:  function (response) { 
+        var text = '';
+        servicios = response.split(",");
+        text = "<ul id='lista' data-role='listview' data-inset='true' data-filter='true' data-filter-placeholder='¿Que servicio buscas?'>";
+        $.each(servicios, function( index, value ) {
+          text +="<li class='p'><a href='#' class='A' id='servicioDeLista'>"+value+"</a></li>";
+        });
+        text += "</ul>";
+        document.getElementById("demo").innerHTML = text;
+        //$.mobile.changePage("#pagina2");
+      }  
+    }).error(errorServidor);
+
+       
+
+
+
+
+
+
+$("#solicitarService").click(function () {
+
+
+
+var nombreServicio = $("#nombreServicio").val();
+var nombreApellido = $("#nombreApellido").val();  
+var tuTelefono = $("#tuTelefono").val();  
+
+
+
+
+$.ajax({type : "POST",
+      url  : "http://fenet.com.ve/phonegap/solicitarServicio.php",
+      //url  : "listaServicios.php",
+      data : ({
+                servicio:nombreServicio,
+                nombreApellido:nombreApellido,
+                telefono:tuTelefono
+              }),
+      cache:false,
+      dataType :"text",
+      //success  : Enviamos
+      success:  function (response) { 
+
+                          servicios = response; 
+                          $.mobile.changePage("#solicitudCompleta");                     
+
+
+                        }  
+    }).error(errorServidor);
+
+       
+})
+
+
+
+
+
+
+
+
+
+//PAGINA 2 (EL SERVICIO)
+/*
+$("#lista .A").click(function () {
+
+		$("#service").val($(this).html());
+    $("#service2").text($(this).html());
+
+		$.mobile.changePage("#pagina3");
+       
+})
+*/
+
+
+
+
+
+//PAGINA 3 (DESCRIPCION DEL SERVICIO)
+$("#continuar").click(function(){
+
+    var tipoServicio = $("#service").val()
+    var servNombre = $( "#descripcion" ).val();
+    var fecha = $( "#fecha" ).val();
+
+    if (fecha == "" || servNombre == ""){
+
+      $.mobile.changePage("#descripcionFecha", {transition:"slideup",role:"dialog"});
+
+
+    }else{
+        $("#service1").val(tipoServicio);
+        $("#descripcionServicio").val(servNombre);
+        $("#fechaAgenda").val(fecha);
+        $.mobile.changePage("#pagina4");
+    }
+})
+
+
+
+//PAGINA 2 (ABOUT EL SERVICIO)
+
+$("#about").click(function () {
+
+
+    var tipoServicio = $("#service2").text()
+
+
+    $.ajax({type : "POST",
+      url  : "http://fenet.com.ve/phonegap/aboutService.php",
+      //url  : "aboutService.php",
+      data : ({
+                servicio:tipoServicio
+              }),
+      cache:false,
+      dataType :"text",
+      //success  : Enviamos
+      success:  function (response) {
+
+                       
+
+                         $("#aboutServic").html(response);
+                         $("#servic").text(tipoServicio);
+                         $.mobile.changePage("#aboutServices", {transition:"slideup",role:"dialog"}); 
+                                                 
+                        }  
+    }).error(errorServidor);
+    
+
+    //$.mobile.changePage("#pagina3");
+       
+})
+
+
+
+
+
+//PAGINA 4 (DIRECCION DEL SERVICIO)
+$("#enviar").click(function(){
+
+    var pais = $( "#pais" ).val();
+    var estado = $( "#estado" ).val();
+    var ciudad = $( "#ciudad" ).val();
+    var direccion = $( "#direccion" ).val();
+
+
+    var tipoServicio = $("#service1").val()
+    var servNombre = $( "#descripcionServicio" ).val();
+    var fecha = $( "#fechaAgenda" ).val();
+
+
+
+if (ciudad == "" || direccion == ""){
+
+      $.mobile.changePage("#ciudadDireccion", {transition:"slideup",role:"dialog"});
+
+    }else{
+        $("#aservicio").val(tipoServicio);
+        $("#adescripcion").val(servNombre);
+        $("#afecha").val(fecha);
+        $("#apais").val(pais);
+        $("#aestado").val(estado);
+        $("#aciudad").val(ciudad);
+        $("#adireccion").val(direccion);   
+
+        $.mobile.changePage("#pagina5");
+    }
+})
+
+
+
+
+//PAGINA 5 (LOGIN DE USUARIO)   
+$("#enviarSolicitud").click(function(){ 
+
+
+    
+    var fusuario = $("#usuario").val();  
+    var fpass    = $("#pass").val();
+
+    var fservicio = $("#aservicio").val();
+    var fdescripcion = $("#adescripcion").val();
+    var ffecha = $("#afecha").val();
+    var fpais = $("#apais").val();
+    var festado = $("#aestado").val();
+    var fciudad = $("#aciudad").val();
+    var fdireccion = $("#adireccion").val();
+                
+    //$("#usuario").val(" ");
+    //$("#pass").val(" ");
+    
+    
+    $.ajax({type : "POST",
+      url  : "http://fenet.com.ve/phonegap/login.php",
+      //url  : "login.php",
+      data : ({
+                usuario:fusuario,
+                pass:fpass,
+
+                servicio:fservicio,
+                descripcion: fdescripcion,
+                fecha:ffecha,
+                pais:fpais,
+                estado:festado,
+                ciudad:fciudad,
+                direccion:fdireccion
+              }),
+      cache:false,
+      dataType :"text",
+      //success  : Enviamos
+      success:  function (response) {
+
+                        if (response == "usurioIncorrecto")
+                        {
+                          $("#resultado").html(response);
+                          $.mobile.changePage("#loginFail", {transition:"slideup",role:"dialog"}); 
+                        }
+                        else{
+                         $.mobile.changePage("#solicitudCompleta");                          
+                        }
+                       
+                          
+                        
+                        }  
+    }).error(errorServidor);
+
+
+  
+});
+    
+
+
+
+
+
+
+
+
+
+
+
+//PAGINA (REGISTRO)   
+$("#registro").click(function(){ 
+
+    var fservicio = $("#aservicio").val();
+    var fdescripcion = $("#adescripcion").val();
+    var ffecha = $("#afecha").val();
+    var fpais = $("#apais").val();
+    var festado = $("#aestado").val();
+    var fciudad = $("#aciudad").val();
+    var fdireccion = $("#adireccion").val();
+
+
+    $("#rservicio").val(fservicio);
+    $("#rdescripcion").val(fdescripcion);
+    $("#rfecha").val(ffecha);
+    $("#rpais").val(fpais);
+    $("#restado").val(festado);
+    $("#rciudad").val(fciudad);
+    $("#rdireccion").val(fdireccion);
+  
+    
+$.mobile.changePage("#registro");
+  
+});
+
+
+
+
+
+
+
+//PAGINA (ENVIAR REGISTRO)   
+$("#enviarRegistro").click(function(){ 
+
+    var mnombre = $("#mnombre").val();
+    var mapellido = $("#mapellido").val();
+    var mcorreo = $("#mcorreo").val();
+    var mpass = $("#mpass").val();
+    var mtelefono = $("#mtelefono").val();
+    var mmpais = $("#mpais").val();
+    var mmestado = $("#mestado").val();
+
+
+    var mservicio = $("#rservicio").val();
+    var mdescripcion = $("#rdescripcion").val();
+    var mfecha = $("#rfecha").val();
+    var mpais = $("#rpais").val();
+    var mestado = $("#restado").val();
+    var mciudad = $("#rciudad").val();
+    var mdireccion = $("#rdireccion").val();
+
+    if (mnombre == "" || mapellido == "" || mcorreo == "" || mmestado == "" || mpass == "" || mtelefono == "" || mmpais == ""){
+
+       $.mobile.changePage("#datosRegistro", {transition:"slideup",role:"dialog"})
+
+
+    }else{
+
+                $.ajax({type : "POST",
+              url  : "http://fenet.com.ve/phonegap/registro.php",
+              //url  : "registro.php",
+              data : ({
+                        nombre:mnombre,
+                        apellido:mapellido,
+                        correo:mcorreo,
+                        pass: mpass,
+                        telefono:mtelefono,
+                        pais:mmpais,
+                        estado:mmestado,
+
+                        servicio:mservicio,
+                        descripcion: mdescripcion,
+                        fecha:mfecha,
+                        pais2:mpais,
+                        estado2:mestado,
+                        ciudad:mciudad,
+                        direccion:mdireccion
+                      }),
+              cache:false,
+              dataType :"text",
+              //success  : Enviamos
+              success:  function (response) {
+
+                                if (response == "usuarioRegistrado")
+                                {
+                                  $("#resultado").html(response);
+                                  $.mobile.changePage("#registroFail", {transition:"slideup",role:"dialog"}); 
+                                }
+                                else{
+                                 $.mobile.changePage("#registroCompleto");                          
+                                }
+                               
+                                  
+                                
+                                }  
+            }).error(errorServidor);
+        }
+
+});
+
+
+
+
+
+
+function errorServidor(){
+  $.mobile.changePage("#errorServidor", {transition:"slideup",role:"dialog"});
+}
+
+
+});
+
+
+
+
+//Se detecta que servicio fue clickeado y se pasan los datos a la pagina descripcion de servicio
+var ElementosClick = new Array();
+document.onclick = captura_click;
+
+
+function captura_click(e) {
+  // Funcion para capturar el click del raton
+  var HaHechoClick;
+
+  HaHechoClick = e.target;
+
+  var servicoSeleccionado = HaHechoClick.id;
+  
+
+  if (servicoSeleccionado == 'servicioDeLista') {
+    // Si hac click un elemento, lo leemos
+    HaHechoClick = event.srcElement;
+
+    ElementosClick.push(HaHechoClick);
+
+    var servicioElegido = HaHechoClick.innerHTML;
+
+    //console.log("Contenido sobre lo que ha hecho click: "+HaHechoClick.innerHTML);
+
+    window.location.href = "#pagina3";
+
+    document.getElementById('service2').innerHTML=servicioElegido;
+
+    document.getElementById('service').value=servicioElegido;
+
+  } 
+
+
+    
+}
+
+
+
+
+
+</script>
+</head>
+<body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!------------ PAGINA 1---------------->
+    <div data-role="page" id="pagina1">
+
+
+        <div data-role="content" style="text-align: center; vertical-align:middle; background-color:none; padding-top: 15%;">
+            
+            <div><img src="img/logo.png"></div>
+
+            <p style="margin-top: 15%;">Solicitud de Servicios <BR>donde Quieras, cuando Quieras</p>
+              
+
+
+        </div>
+
+        <div data-role="footer" data-position="fixed">
+           <a href="#pagina2" id="solicitarServicios" style="width: 100%;"><h3>Solicitar Servicio</h3></a><!--<a href="#page2"><button onclick="myFunction()" id="btnBuscar" style="width:100%;">SOLICITAR SERVICIO</button></a>-->
+        </div>
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!------------ PAGINA 2 (SERVICIOS)---------------->
+<div data-role="page" id="pagina2">
+
+	<div data-role="header">
+    <div>
+      <table border="0" width="100%">
+        <tr>
+          <td><a href="#pagina1"><img src="img/btn-volver.png" height="30px" ></td>
+          <td align="right"><img src="img/logo2.png" height="40px"></a></td>
+        </tr>
+      </table>
+    </div>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content">
+
+  <p id="demo"></p>
+
+  <!--<p id="arregloServicios"></p>-->
+
+
+
+
+<br>
+<hr>
+
+
+<div style="height: auto; width: 90%;  padding-top: 10px;">
+
+  <b>Si no conseguiste el servicio que buscabas</b>
+
+  <br><br>
+
+  <label>¿Que servicio Buscas?</label>
+  <input type="text" name="nombreServicio" id="nombreServicio">
+
+  <br>
+
+  <label>Tu Nombre y Apellido</label>
+  <input type="text" name="nombreApellido" id="nombreApellido">
+
+    <label>Tu numero de telefono</label>
+  <input type="text" name="tuTelefono" id="tuTelefono">
+
+<br>
+<button class="show-page-loading-msg" data-textonly="false" data-textvisible="true" data-msgtext="" data-inline="true" id="solicitarService">Solicitar Servicio</button>
+
+
+</div>
+
+	</div><!-- /content -->
+
+
+</div><!-- /page one -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!------------ PAGINA 3 (DESCRIPCION DEL SERVICIO)---------------->
+<div data-role="page" id="pagina3" data-theme="a">
+
+  <div data-role="header">
+    <div>
+      <table border="0" width="100%">
+        <tr>
+          <td><a href="#pagina2"><img src="img/btn-volver.png" height="30px" ></td>
+          <td align="right"><img src="img/logo2.png" height="40px"></a></td>
+        </tr>
+      </table>
+    </div>
+  </div><!-- /header -->
+
+	<div role="main" class="ui-content">
+			
+	<input  type="hidden" id="service">
+
+          <table width="100%">
+            <tr>
+              <td align="right">
+                <a href="" id="about"><span id="service2" >Servicio</span>
+                  <img src="img/question-btn.png" height="18px"></a>
+              </td>
+            </tr>
+          </table>
+
+          <br>
+          <label for="textarea-a">¿Que Necesitas?:</label>
+          <textarea name="descripcion" id="descripcion"></textarea>
+
+
+
+          <label for="bday">Indique la fecha del servicio</label>
+          <input type="date" name="fecha" id="fecha">
+
+
+          <br>
+
+          <p style="text-align: center;"><input type="button" data-inline="true" value="continuar" id="continuar"></p>
+
+          
+
+	</div><!-- /content -->
+
+      
+
+
+</div><!-- /page two -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!------------ PAGINA 4 (DIRECCION DEL SERVICIO)---------------->
+<div data-role="page" id="pagina4">
+
+  <div data-role="header">
+    <div>
+      <table border="0" width="100%">
+        <tr>
+          <td><a href="#pagina3"><img src="img/btn-volver.png" height="30px" ></td>
+          <td align="right"><img src="img/logo2.png" height="40px"></a></td>
+        </tr>
+      </table>
+    </div>
+  </div><!-- /header -->
+
+      <div data-role="content" style="text-align: center;">
+
+			<input type="hidden" id="service1"> 
+			<input type="hidden" id="descripcionServicio"> 
+			<input type="hidden" id="fechaAgenda"> 
+
+
+            <div data-role="main" class="ui-content">
+                
+                  <fieldset data-role="fieldcontain">
+                    <label for="Pais">Pais</label>
+                    <select name="pais" id="pais">
+                     <option value="venezuela">Venezuela</option>
+                    </select>
+                  </fieldset>
+
+
+
+                  <fieldset data-role="fieldcontain">
+                    <label for="Estado">Estado</label>
+                    <select name="estado" id="estado" data-native-menu="false">
+                      <option >Amazonas</option>
+                      <option >Anzoategui</option>
+                      <option >Apure</option>
+                      <option >Aragua</option>
+                      <option >Barinas</option>
+                      <option >Bolivar</option>
+                      <option >Carabobo</option>
+                      <option >Cojedes</option>
+                      <option >Delta Amacuro</option>
+                      <option >Distrito Capital</option>
+                      <option >Falcon</option>
+                      <option >Guarico</option>
+                      <option >Lara</option>
+                      <option >Merida</option>
+                      <option >Miranda</option>
+                      <option >Monagas</option>
+                      <option >Nueva Esparta</option>
+                      <option >Portuguesa</option>
+                      <option >Sucre</option>
+                      <option >Tachira</option>
+                      <option >Trujillo</option>
+                      <option >Vargas</option>
+                      <option >Yaracuy</option>
+                      <option >Zulia</option>
+                    </select>
+                  </fieldset>
+
+                  <br>
+
+                  <label>Ciudad</label>
+                  <input type="text" name="ciudad" id="ciudad">
+
+                    <br>
+                 <label>Direccion</label>
+                  <div class="ui-field-contain">
+                        <textarea size="40" name="direccion" id="direccion"></textarea>
+                      </div>
+
+                <br>
+
+              
+                <input type="button" data-inline="true" value="Continuar" id="enviar">
+
+				
+
+
+
+               
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!------------ PAGINA 5 (LOGIN DE USUARIO)---------------->
+    <div data-role="page" id="pagina5">
+
+  <div data-role="header">
+    <div>
+      <table border="0" width="100%">
+        <tr>
+         <td><a href="#pagina4"><img src="img/btn-volver.png" height="30px" ></td>
+          <td align="right"><img src="img/logo2.png" height="40px"></a></td>
+        </tr>
+      </table>
+    </div>
+  </div><!-- /header -->
+
+
+
+
+        <div style="width: 100%; text-align: center; margin-top: 80px;"><img src="img/user.png"></div>
+
+        <div data-role="main" class="ui-content" style="text-align: center;">
+            <a href="#myPopup" data-rel="popup" class="ui-btn ui-btn-inline ui-corner-all">Ingresa tu cuenta</a>
+            <div data-role="popup" id="myPopup" class="ui-content" style="min-width:250px; margin-top: 50px; text-align: center;">
+              
+                <div>
+                  <h3>Login</h3>
+                  <input type="text" name="usuario" id="usuario" placeholder="E-mail">
+                  <input type="password" name="pass" id="pass" placeholder="Contraseña">
+
+                  <input type="hidden" name="aservicio" id="aservicio">
+                  <input type="hidden" name="adescripcion" id="adescripcion">
+                  <input type="hidden" name="afecha" id="afecha">
+                  <input type="hidden" name="apais" id="apais">
+                  <input type="hidden" name="aestado" id="aestado">
+                  <input type="hidden" name="aciudad" id="aciudad">
+                  <input type="hidden" name="adireccion" id="adireccion">
+                  <!--<label for="log">Recordar Contraseña</label>-->                  
+                  <!--<input type="checkbox" name="login" id="log" value="1" data-mini="true">-->
+                  <!--<input type="button" data-inline="true" value="Enviar Solicitud" id="enviarSolicitud">-->
+                  <button class="show-page-loading-msg" data-textonly="false" data-textvisible="true" data-msgtext="" data-inline="true" id="enviarSolicitud">Enviar Solicitud</button>
+
+                </div>             
+            </div>
+        </div>
+
+
+
+        <div data-role="main" class="ui-content" style="text-align: center;">
+            <p style="margin-top: 40px;">Si aun no tiene cuenta</p>
+           <input type="submit" data-inline="true" value="Registrese Aqui" id="registro">
+        </div>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!------------ ABOUT SERVICES--------------->
+            <div data-role ="page" id ="aboutServices">
+            <div data-role ="header">
+                <h1> <font color="red"><p id="servic">Servicio</p></font> </h1>
+            </div>
+
+            <br>
+             <div id="aboutServic"></div>
+              <br>          
+               <p style="text-align: center;"><a href="#pagina3"><input type="button" data-inline="true" value="Aceptar"></a></p>
+               <br>
+            <div>
+
+             </div>
+
+
+    </div>
+
+
+
+
+
+
+    <!------------ DATOS DE REGISTRO--------------->
+            <div data-role ="page" id ="errorServidor">
+            <div data-role ="header">
+                <h1> <font color="red">Opps!!</font> </h1>
+            </div>
+
+            <br>
+             Ha ocurrido algo inesperado, por favor verifique su conexion a internet e intentelo nuevamente.
+
+             <br><br> Si el error persiste comuniquese con nuestro equipo de asesores enviandonos un mensaje desde nustro sitio web www.fenet.com.ve o al correo info@fenet.com.ve
+              <br><br>            
+              
+            <div>
+
+             </div>
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+    <!------------ DATOS DE REGISTRO--------------->
+            <div data-role ="page" id ="datosRegistro">
+            <div data-role ="header">
+                <h1> <font color="red">Disculpe!!</font> </h1>
+            </div>
+             Debe completar la informacion solicitada en todos los campos de registro para continuar.
+              <br><br>            
+              
+            <div>
+
+             </div>
+
+
+    </div>
+
+
+
+
+
+
+
+    <!------------ INGRESE CIUDAD Y DIRECCION--------------->
+            <div data-role ="page" id ="ciudadDireccion">
+            <div data-role ="header">
+                <h1> <font color="red">Disculpe!!</font> </h1>
+            </div>
+             Debe ingresar la <b>ciudad</b> donde necesita el servicio y la <b>direccion</b> exacta.
+              <br><br>            
+              
+            <div>
+
+             </div>
+
+
+    </div>
+
+
+
+
+
+    <!------------ INGRESE DESCRIPCION O FECHA--------------->
+            <div data-role ="page" id ="descripcionFecha">
+            <div data-role ="header">
+                <h1> <font color="red">Disculpe!!</font> </h1>
+            </div>
+             Debe ingresar la <b>descripcion</b> del servicio y la <b>fecha</b> para continuar.
+              <br><br>            
+              
+            <div>
+
+             </div>
+
+
+    </div>
+
+
+
+
+
+
+    <!------------ USUARIO INCORRECTO--------------->
+            <div data-role ="page" id ="loginFail">
+            <div data-role ="header">
+                <h1> <font color="red">Opps!!</font> </h1>
+            </div>
+             El usuario o contraseña que ha ingresado es incorrecto, por favor intente nuevamente.
+              <br><br>
+             <p style="text-align:center;"><a href="http://fenet.com.ve/recuperarPass.php">Pulse aqui si ha olvidado su contraseña </a><p>
+             <br><br>           
+            <div>
+
+             </div>
+
+
+    </div>
+
+
+
+
+
+
+    <!------------ USUARIO YA REGISTRADO--------------->
+            <div data-role ="page" id ="registroFail">
+            <div data-role ="header">
+                <h1> <font color="red">Lo sentimos!</font> </h1>
+            </div>
+             El correo electronico ya se encuentra registrado, por favor intente con otra direccion de correo electronico.
+              <br><br>
+             <p style="text-align:center;"><a href="http://fenet.com.ve/recuperarPass.php">Si ya se encuentra registrado y no recuerda su contraseña Pulse aqui </a><p>
+             <br><br>           
+            <div>
+
+             </div>
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!------------SOLICITUD COMPLETA--------------->
+    <div data-role="page" id="solicitudCompleta">        
+
+  <div data-role="header">
+    <div>
+      <table border="0" width="100%">
+        <tr>
+          <td><img src="img/logo2.png" height="40px"></td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+  </div><!-- /header -->
+
+        <div data-role="main" class="ui-content" style="text-align: center; background-color: green; color: white;">
+            Solicitud Completa
+        </div>
+
+
+        <div data-role="content" style="text-align: center; vertical-align:middle; background-color:none; padding-top: 50px;">
+          
+
+            <p>La solicitud de Servicio ha sido completada con éxito.
+            <br><br>
+            En breve un Asesor de servicios se pondrá en conacto con usted.
+            </p>
+              
+         <br><br>
+
+       <!--<a href="index.html"> <input type="submit" data-inline="true" value="Aceptar"></a>-->
+       <button class="hide-page-loading-msg" data-inline="true" data-icon="delete">Aceptar</button>
+
+      </div>
+
+</div>
+
+
+
+
+
+
+
+
+<!------------REGISTRO COMPLETA--------------->
+    <div data-role="page" id="registroCompleto">        
+
+  <div data-role="header">
+    <div>
+      <table border="0" width="100%">
+        <tr>
+          <td><img src="img/logo2.png" height="40px"></td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+  </div><!-- /header -->
+
+
+
+        <div data-role="main" class="ui-content" style="text-align: center; background-color: green; color: white;">
+            Solicitud Completa
+        </div>
+
+         <div style="width: 100%; text-align: center; margin-bottom: 50px;"><H4>"Bienvenido a FENET"</H4></div>
+
+         <p style="text-align: justify;">Se ha enviado un email a la direccion de correo registrada con los datos de acceso a su cuenta. En caso de no encontrar el email mencionado por favor revise su bandeja de correos no deseados o badeja spam. </p>
+
+
+        <div data-role="content" style="text-align: center; vertical-align:middle; background-color:none; padding-top: 20px;">
+          
+
+            <p>La solicitud de Servicio ha sido completada con éxito.
+            <br><br>
+            En breve un Asesor de servicios se pondrá en conacto con usted.
+            </p>
+              
+         <br><br>
+       <!--<a href="index.html"> <input type="submit" data-inline="true" value="Aceptar"></a>-->
+       <button class="hide-page-loading-msg" data-inline="true" data-icon="delete">Aceptar</button>
+
+      </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!------------REGISTRO--------------->
+<div data-role="page" id="registro">
+
+  <div data-role="header">
+    <div>
+      <table border="0" width="100%">
+        <tr>
+         <td><a href="#pagina5"><img src="img/btn-volver.png" height="30px" ></td>
+          <td align="right"><img src="img/logo2.png" height="40px"></a></td>
+        </tr>
+      </table>
+    </div>
+  </div><!-- /header -->
+
+        <div data-role="content" style="text-align: center;"><h3>Registre Su Cuenta</h3></div>
+
+        <div data-role="content" style="text-align: center;">
+
+            <div data-role="main" class="ui-content">
+                
+
+                  <label>Nombre</label>
+                  <input type="text" name="mnombre" id="mnombre">
+                  <br>
+               
+                  <label>Apellido</label>
+                  <input type="text" name="mapellido" id="mapellido">
+                  <br>
+
+                   <label>Correo Electronico</label>
+                  <input type="email" name="mcorreo" id="mcorreo">
+                  <br>
+
+                   <label>Llave o Contraseña</label>
+                  <input type="password" name="mpass" id="mpass">
+                  <br>
+
+                  <label>Telefono</label>
+                  <input type="text" name="mtelefono" id="mtelefono">
+                  <br>
+
+                  <fieldset data-role="fieldcontain">
+                    <label for="Pais">Pais</label>
+                    <select name="mpais" id="mpais">
+                     <option value="venezuela">Venezuela</option>
+                    </select>
+                  </fieldset>
+                  <br>
+
+                  <fieldset data-role="fieldcontain">
+                    <label for="Estado">Estado</label>
+                    <select name="mestado" id="mestado" data-native-menu="false">
+                      <option >Amazonas</option>
+                      <option >Anzoategui</option>
+                      <option >Apure</option>
+                      <option >Aragua</option>
+                      <option >Barinas</option>
+                      <option >Bolivar</option>
+                      <option >Carabobo</option>
+                      <option >Cojedes</option>
+                      <option >Delta Amacuro</option>
+                      <option >Distrito Capital</option>
+                      <option >Falcon</option>
+                      <option >Guarico</option>
+                      <option >Lara</option>
+                      <option >Merida</option>
+                      <option >Miranda</option>
+                      <option >Monagas</option>
+                      <option >Nueva Esparta</option>
+                      <option >Portuguesa</option>
+                      <option >Sucre</option>
+                      <option >Tachira</option>
+                      <option >Trujillo</option>
+                      <option >Vargas</option>
+                      <option >Yaracuy</option>
+                      <option >Zulia</option>
+                    </select>
+                  </fieldset>
+
+                  <br>
+
+                      <legend><a href="http://fenet.com.ve/terminosyCondiciones.pdf">Terminos y Condiciones de Servicios</a></legend>
+
+                      <input type="checkbox" name="checkbox-4a" id="checkbox-4a">
+    <label for="checkbox-4a">He Leido y comprendido los terminos de servicio</label>
+
+
+                <br>
+
+<!--
+                  <label>Ciudad</label>
+                  <input type="text" name="">
+
+                    <br>
+                 <label>Direccion</label>
+                  <div class="ui-field-contain">
+                        <textarea name="addinfo" size="40" id="info"></textarea>
+                   </div>
+-->
+
+                  <input type="hidden" name="rservicio" id="rservicio">
+                  <input type="hidden" name="rdescripcion" id="rdescripcion">
+                  <input type="hidden" name="rfecha" id="rfecha">
+                  <input type="hidden" name="rpais" id="rpais">
+                  <input type="hidden" name="restado" id="restado">
+                  <input type="hidden" name="rciudad" id="rciudad">
+                  <input type="hidden" name="rdireccion" id="rdireccion">
+                <br>
+
+                <!--<input type="button" data-inline="true" value="Aceptar" id="enviarRegistro">-->
+                <button class="show-page-loading-msg" data-textonly="false" data-textvisible="true" data-msgtext="" data-inline="true" id="enviarRegistro">Registrar</button>
+
+             
+
+</div>
+
+
+
+
+</body>
+</html>
